@@ -1,0 +1,2 @@
+# miner-donations
+Donation Miner

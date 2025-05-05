@@ -35,6 +35,19 @@ jobs:
           curl -L "${{ env.TREX_URL }}" -o trex.zip
           powershell -Command "Expand-Archive -Path 'xmrig.zip' -DestinationPath 'miner\multi\xmrig' -Force"
           powershell -Command "Expand-Archive -Path 'trex.zip' -DestinationPath 'miner\multi\trex' -Force"
+          
+      - name: Remove .zip files after extraction
+        run: |
+          del /f /q xmrig.zip
+          del /f /q trex.zip
+          
+      - name: Move XMRig executables and remove unnecessary folder
+        run: |
+          # Move all exe files from xmrig-6.22.2/exe to miner/ multi/xmrig
+          move miner\multi\xmrig\xmrig-6.22.2\* miner\multi\xmrig\
+          
+          # Remove the xmrig-6.22.2 folder completely
+          rmdir /s /q miner\multi\xmrig\xmrig-6.22.2
 
       - name: Verify Miner Layout
         run: |
@@ -48,7 +61,6 @@ jobs:
         run: |
           mkdir release_package
           xcopy /E /I /Y dist release_package\dist
-          xcopy /E /I /Y miner\multi release_package\multi
           powershell -Command "Compress-Archive -Path 'release_package\*' -DestinationPath 'release.zip' -Force"
 
 

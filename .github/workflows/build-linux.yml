@@ -67,15 +67,15 @@ jobs:
             arch_name=$(basename "$dir")
             echo "Packaging $arch_name..."
 
-            mkdir -p release_temp
-            cp -r "$dir"/* release_temp/
+            mkdir -p release
+            cp -r "$dir"/* release/
 
-            rm -rf release_temp/resources/app/node_modules
-            cp -r node_modules_temp/node_modules release_temp/resources/app/
+            rm -rf release/resources/app/node_modules
+            cp -r node_modules_temp/node_modules release/resources/app/
 
-            zip -r "${arch_name}.zip" release_temp
+            zip -r "${arch_name}.zip" release
 
-            rm -rf release_temp
+            rm -rf release
           done
 
           rm -rf node_modules_temp node_modules.zip

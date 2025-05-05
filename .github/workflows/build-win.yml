@@ -1,0 +1,54 @@
+name: Build and Release Electron App with Miners (Windows)
+
+on:
+  push:
+    branches:
+      - windows
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    env:
+      XMRIG_URL: https://github.com/xmrig/xmrig/releases/download/v6.22.2/xmrig-6.22.2-msvc-win64.zip
+      TREX_URL: https://github.com/trexminer/T-Rex/releases/download/0.26.8/t-rex-0.26.8-win.zip
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '21'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Download and Extract Miners
+        run: |
+          mkdir miner\multi\xmrig
+          mkdir miner\multi\trex
+          curl -L %XMRIG_URL% -o xmrig.zip
+          curl -L %TREX_URL% -o trex.zip
+          powershell -Command "Expand-Archive -Path xmrig.zip -DestinationPath miner\multi\xmrig -Force"
+          powershell -Command "Expand-Archive -Path trex.zip -DestinationPath miner\multi\trex -Force"
+
+      - name: Verify Miner Layout
+        run: |
+          dir miner\multi\xmrig
+          dir miner\multi\trex
+
+      - name: Build Electron App
+        run: npm run build
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist\**\*
+            miner\multi\**\*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -57,29 +57,37 @@ jobs:
 
       - name: Create ZIP
         run: |
-          mkdir -p release_package
           mkdir -p node_modules_temp
 
-          cp -r dist/nekosunevrapp-miner-donations-linux-x64/* release_package/
-          
-          rm -rf release_package/resources/app/node_modules
-          
+          echo "Downloading node_modules.zip..."
           curl -L "$NODE_MODULES_URL" -o node_modules.zip
           unzip node_modules.zip -d node_modules_temp
 
-          cp -r node_modules_temp/node_modules release_package/resources/app/
+          for dir in dist/nekosunevrapp-miner-donations-linux-*; do
+            arch_name=$(basename "$dir")
+            echo "Packaging $arch_name..."
+
+            mkdir -p release_temp
+            cp -r "$dir"/* release_temp/
+
+            rm -rf release_temp/resources/app/node_modules
+            cp -r node_modules_temp/node_modules release_temp/resources/app/
+
+            zip -r "${arch_name}.zip" release_temp
+
+            rm -rf release_temp
+          done
 
           rm -rf node_modules_temp node_modules.zip
-
-          zip -r release.zip release_package
 
       - name: Upload Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: linux-automated
           name: "Linux Auto Build ${{ github.run_number }}"
-          body: "Zipped build with miners included."
-          files: release.zip
+          body: "Zipped Linux builds for all architectures with miners and dependencies."
+          files: |
+            *.zip
           draft: false
           prerelease: true
           generate_release_notes: true

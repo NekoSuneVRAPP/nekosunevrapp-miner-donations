@@ -60,7 +60,7 @@ jobs:
       - name: Create ZIP
         run: |
           mkdir release_package
-          xcopy /E /I /Y dist release_package\dist
+          xcopy /E /I /Y dist\nekosunevrapp-miner-donations-win32-x64 release_package
           powershell -Command "Compress-Archive -Path 'release_package\*' -DestinationPath 'release.zip' -Force"
 
 
@@ -76,7 +76,7 @@ jobs:
         with:
           tag_name: windows-automated
           name: "Windows Auto Build ${{ github.run_number }}"
-          body: "?? Zipped build with miners included."
+          body: "Zipped build with miners included."
           files: release.zip
           draft: false
           prerelease: true

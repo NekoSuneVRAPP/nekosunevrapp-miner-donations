@@ -7,7 +7,7 @@
   "scripts": {
     "start": "electron .",
     "clean": "rimraf dist",
-    "packager": "npm run clean && electron-packager . nekosunevrapp-miner-donations --platform=linux --arch=all --icon=icon.ico --out=./dist --overwrite"
+    "packager": "npm run clean && electron-packager . nekosunevrapp-miner-donations --platform=linux --arch=x64,arm64 --icon=icon.ico --out=./dist --overwrite"
   },
   "dependencies": {
     "axios": "^0.18.1",

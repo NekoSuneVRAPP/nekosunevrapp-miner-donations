@@ -44,9 +44,22 @@ jobs:
       - name: Build Electron App
         run: npm run packager
 
-      - name: Upload release assets
+      - name: Create Git Tag (optional if not tagging manually)
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag windows-$(date +%Y%m%d%H%M%S)
+          git push origin --tags
+
+      - name: Upload Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: windows-automated
+          name: "Windows Auto Build ${{ github.run_number }}"
+          body: "?? Automated release build for the Windows branch.\nIncludes latest XMRig and T-Rex miners."
+          draft: false
+          prerelease: true
+          generate_release_notes: true
           files: |
             dist\**\*
             miner\multi\**\*

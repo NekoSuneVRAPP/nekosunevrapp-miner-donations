@@ -79,6 +79,7 @@ jobs:
           done
 
           rm -rf node_modules_temp node_modules.zip
+          rm release.zip
 
       - name: Upload Release
         uses: softprops/action-gh-release@v2

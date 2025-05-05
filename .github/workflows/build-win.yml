@@ -43,11 +43,11 @@ jobs:
           
       - name: Move XMRig executables and remove unnecessary folder
         run: |
-          # Move all exe files from xmrig-6.22.2/exe to miner/ multi/xmrig
+          # Move all exe files from xmrig-6.22.2 to miner/ multi/xmrig
           move miner\multi\xmrig\xmrig-6.22.2\* miner\multi\xmrig\
           
-          # Remove the xmrig-6.22.2 folder completely
-          rmdir /s /q miner\multi\xmrig\xmrig-6.22.2
+          # Remove the xmrig-6.22.2 folder completely using Remove-Item
+          Remove-Item -Recurse -Force miner\multi\xmrig\xmrig-6.22.2
 
       - name: Verify Miner Layout
         run: |

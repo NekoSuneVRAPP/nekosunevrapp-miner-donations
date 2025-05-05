@@ -1,0 +1,87 @@
+name: Build and Release Electron App with Miners (Linux)
+
+on:
+  push:
+    branches:
+      - linux
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      XMRIG_URL: https://github.com/xmrig/xmrig/releases/download/v6.22.2/xmrig-6.22.2-jammy-x64.tar.gz 
+      TREX_URL: https://github.com/trexminer/T-Rex/releases/download/0.26.8/t-rex-0.26.8-linux.tar.gz
+      NODE_MODULES_URL: https://github.com/ChisdealHDAPP/nekosunevrapp-miner-modules/releases/download/1.0.0/node_modules.zip
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Download and Extract Miners
+        run: |
+          mkdir -p miner/multi/xmrig
+          mkdir -p miner/multi/trex
+          curl -L "$XMRIG_URL" -o xmrig.tar.gz
+          curl -L "$TREX_URL" -o trex.tar.gz
+          tar -xzf xmrig.tar.gz -C miner/multi/xmrig
+          tar -xzf trex.tar.gz -C miner/multi/trex
+
+      - name: Clean up archives
+        run: |
+          rm -f xmrig.tar.gz
+          rm -f trex.tar.gz
+
+      - name: Flatten XMRig directory structure
+        run: |
+          mv miner/multi/xmrig/xmrig-6.22.2/* miner/multi/xmrig/
+          rm -rf miner/multi/xmrig/xmrig-6.22.2
+
+      - name: Verify Miner Layout
+        run: |
+          ls -la miner/multi/xmrig
+          ls -la miner/multi/trex
+
+      - name: Build Electron App
+        run: npm run packager
+
+      - name: Create ZIP
+        run: |
+          mkdir -p release_package
+          mkdir -p node_modules_temp
+
+          cp -r dist/nekosunevrapp-miner-donations-linux-x64/* release_package/
+          
+          rm -rf release_package/resources/app/node_modules
+          
+          curl -L "$NODE_MODULES_URL" -o node_modules.zip
+          unzip node_modules.zip -d node_modules_temp
+
+          cp -r node_modules_temp/node_modules release_package/resources/app/
+
+          rm -rf node_modules_temp node_modules.zip
+
+          zip -r release.zip release_package
+
+      - name: Upload Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: linux-automated
+          name: "Linux Auto Build ${{ github.run_number }}"
+          body: "Zipped build with miners included."
+          files: release.zip
+          draft: false
+          prerelease: true
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

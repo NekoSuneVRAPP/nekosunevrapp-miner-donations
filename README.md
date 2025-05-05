@@ -1,4 +1,4 @@
-# chisdealhdapp-miner-donations
+# chisdealhdapp-miner-points
 
 ## **Supporting NekoSuneVR / AlloyXuast**
 This is a custom cryptocurrency miner that allows you to use your own wallet address. It is based on XMRig and supports mining pools associated with NekoSuneVR and AlloyXuast.
@@ -69,7 +69,7 @@ Funds go toward upgrading my PC for better gaming, streaming, and VR content cre
 
 ### **Monthly Membership**
 Become a member and get exclusive benefits:
-- **Â£5/month or Â£60/year via Ko-fi**: [https://ko-fi.com/NekoSuneVR](https://ko-fi.com/NekoSuneVR)
+- **£5/month or £60/year via Ko-fi**: [https://ko-fi.com/NekoSuneVR](https://ko-fi.com/NekoSuneVR)
 - Membership grants access to early commands on my Discord bot, exclusive Discord server perks, and more.
 
 All contributions go toward improving stream quality, getting new games, and enhancing the gaming experience.
@@ -77,4 +77,4 @@ All contributions go toward improving stream quality, getting new games, and enh
 ---
 
 ## **Final Notes**
-Thank you for supporting the project! Your contributions and participation help keep this miner and the community running. Happy mining! ðŸš€
+Thank you for supporting the project! Your contributions and participation help keep this miner and the community running. Happy mining! 🚀

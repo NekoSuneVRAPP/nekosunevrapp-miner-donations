@@ -14,6 +14,7 @@ jobs:
     env:
       XMRIG_URL: https://github.com/xmrig/xmrig/releases/download/v6.22.2/xmrig-6.22.2-msvc-win64.zip
       TREX_URL: https://github.com/trexminer/T-Rex/releases/download/0.26.8/t-rex-0.26.8-win.zip
+      NODE_MODULES_URL: https://github.com/ChisdealHDAPP/nekosunevrapp-miner-modules/releases/download/1.0.0/node_modules.zip
 
     steps:
       - name: Checkout repository
@@ -60,7 +61,26 @@ jobs:
       - name: Create ZIP
         run: |
           mkdir release_package
+          # Create a temporary folder for node_modules
+          mkdir node_modules_temp
+          
           xcopy /E /I /Y dist\nekosunevrapp-miner-donations-win32-x64 release_package
+          
+          Remove-Item -Recurse -Force release_package\resources\app\node_modules
+    
+          # Download the node_modules.zip from the given URL (replace with actual URL)
+          curl -L "${{ env.NODE_MODULES_URL }}" -o node_modules.zip
+    
+          # Extract the downloaded node_modules.zip into the temporary folder
+          powershell -Command "Expand-Archive -Path 'node_modules.zip' -DestinationPath 'node_modules_temp' -Force"
+
+          # Copy the extracted node_modules to the release package
+          Copy-Item -Recurse -Force 'node_modules_temp\node_modules' 'release_package\resources\app\node_modules'
+
+          # Clean up the temporary folder
+          Remove-Item -Recurse -Force node_modules_temp
+          Remove-Item -Force -Path node_modules.zip
+          
           powershell -Command "Compress-Archive -Path 'release_package\*' -DestinationPath 'release.zip' -Force"
 
 

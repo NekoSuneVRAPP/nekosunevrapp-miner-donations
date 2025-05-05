@@ -43,6 +43,14 @@ jobs:
 
       - name: Build Electron App
         run: npm run packager
+        
+      - name: Create ZIP
+        run: |
+          mkdir release_package
+          xcopy /E /I /Y dist release_package\dist
+          xcopy /E /I /Y miner\multi release_package\multi
+          powershell -Command "Compress-Archive -Path 'release_package\*' -DestinationPath 'release.zip' -Force"
+
 
       - name: Create Git Tag (optional if not tagging manually)
         run: |
@@ -56,12 +64,10 @@ jobs:
         with:
           tag_name: windows-automated
           name: "Windows Auto Build ${{ github.run_number }}"
-          body: "?? Automated release build for the Windows branch.\nIncludes latest XMRig and T-Rex miners."
+          body: "?? Zipped build with miners included."
+          files: release.zip
           draft: false
           prerelease: true
           generate_release_notes: true
-          files: |
-            dist\**\*
-            miner\multi\**\*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

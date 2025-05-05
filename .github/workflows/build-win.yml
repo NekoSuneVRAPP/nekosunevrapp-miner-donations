@@ -38,8 +38,8 @@ jobs:
           
       - name: Remove .zip files after extraction
         run: |
-          del /f /q xmrig.zip
-          del /f /q trex.zip
+          Remove-Item -Force -Path xmrig.zip
+          Remove-Item -Force -Path trex.zip
           
       - name: Move XMRig executables and remove unnecessary folder
         run: |

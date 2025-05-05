@@ -42,7 +42,7 @@ jobs:
           dir miner\multi\trex
 
       - name: Build Electron App
-        run: npm run build
+        run: npm run packager
 
       - name: Upload release assets
         uses: softprops/action-gh-release@v2

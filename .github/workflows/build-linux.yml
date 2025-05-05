@@ -85,7 +85,7 @@ jobs:
         with:
           tag_name: linux-automated
           name: "Linux Auto Build ${{ github.run_number }}"
-          body: "Zipped Linux builds for all architectures with miners and dependencies."
+          body: "Zipped Linux builds for all architectures with miners and dependencies.\n\n## For make this work on Linux, Please install\n\n```sudo apt install libgconfig-2-4```"
           files: |
             *.zip
           draft: false

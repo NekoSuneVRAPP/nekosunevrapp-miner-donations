@@ -3,6 +3,12 @@
 ## **Supporting NekoSuneVR / AlloyXuast**
 This is a custom cryptocurrency miner that allows you to use your own wallet address. It is based on XMRig and supports mining pools associated with NekoSuneVR and AlloyXuast.
 
+
+## For make this work on Linux, Please install
+
+```sudo apt install libgconfig-2-4```
+
+on your Linux Server / Sysem or Rasberry Pi
 ---
 
 ## **What is Cryptocurrency Mining?**

@@ -164,7 +164,7 @@
                </div>
             </form>
          </div>
-         <div v-if="update" class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+         <div v-if="version !== update" class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                <div class="modal-content">
                   <div class="modal-header">
@@ -174,7 +174,7 @@
                      </button>
                   </div>
                   <div class="modal-body">
-                     <p>You are running version <strong>{{ version }}</strong>, version <strong>{{ update.current_version }}</strong> is now available!</p>
+                     <p>You are running version <strong>{{ version }}</strong>, version <strong>{{ update }}</strong> is now available!</p>
                      <p>Please note that your version will be deprecated soon and it might stop to work.</p>
                   </div>
                   <div class="modal-footer">
@@ -182,13 +182,6 @@
                      <button type="button" class="btn btn-light" data-dismiss="modal">Later</button>
                   </div>
                </div>
-            </div>
-         </div>
-         <div v-if="update && update.backward_compatible === false" class="overlay-incompatible">
-            <div class="overlay-content">
-               <p>You are running version <strong>{{ version }}</strong>. This version is not supported anymore.</p>
-               <p>Please download the latest version from the AlloyXuast Github.</p>
-               <button v-on:click="openExternal(urls.web.EarnMining)" type="button" class="btn btn-primary margin-top-20">Download v{{ update.current_version }}</button>
             </div>
          </div>
       </div>

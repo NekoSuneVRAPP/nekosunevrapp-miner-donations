@@ -476,10 +476,10 @@ var app = new Vue({
       var self = this;
       axios({
         method: "GET",
-        url: this.urls.api.CheckForUpdates + self.version
+        url: this.urls.api.CheckForUpdates
       })
         .then(function(response) {
-          self.update = response.data.support.result;
+          self.update = response.data.version;
         })
         .catch(function(error) {
           console.log(error);
@@ -589,13 +589,11 @@ var app = new Vue({
       var self = this;
       return {
         api: {
-          CheckForUpdates: `${this
-            .url}/v4/cryptoendpoint/miner/CheckForUpdates/`
+          CheckForUpdates: `https://raw.githubusercontent.com/ChisdealHDAPP/nekosunevrapp-miner-donations/refs/heads/linux/package.json`
         },
         web: {
           EarnMining:
-            `https://github.com/ChisdealHDAPP/nekosunevrapp-miner-donations/releases/` +
-            self.version,
+            `https://github.com/ChisdealHDAPP/nekosunevrapp-miner-donations/releases/linux-automated`,
           PanelAccountDetails: `https://apps.nekosunevr.co.uk/`
         }
       };
@@ -614,7 +612,7 @@ var app = new Vue({
     },
 
     update: function(newVal, oldVal) {
-      if (newVal.update_available && newVal.backward_compatible) {
+      if (this.version && newVal) {
         setTimeout(function() {
           $("#updateModal").modal();
         }, 1000);

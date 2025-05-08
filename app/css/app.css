@@ -27,6 +27,21 @@ h1 {
     
 }*/
 
+.modal-backdrop.show {
+    background-color: rgba(0, 0, 0, 0.85); /* Darker backdrop */
+  }
+  
+  .modal-content {
+    background-color: #1e1e1e; /* Dark content box */
+    color: white; /* Light text for contrast */
+  }
+  
+  .modal-header,
+  .modal-footer {
+    border-color: #333;
+  }
+  
+
 a {
     color: var(--primary-color);
 }

@@ -201,12 +201,12 @@ var app = new Vue({
         {
           name: "Ethereum Classic",
           algo: "etchash",
-          url: "stratum+tcp://etc.kryptex.network:7777"
+          url: "stratum+tcp://etchash.unmineable.com:3333"
         },
         {
           name: "Ravencoin",
           algo: "kawpow",
-          url: "stratum+tcp://rvn.kryptex.network:7777"
+          url: "stratum+tcp://kp.unmineable.com:3333"
         }
       ];
 
@@ -214,7 +214,7 @@ var app = new Vue({
       let bestHashRate = 0;
 
       for (const pool of pools) {
-        const command = `${minerPath} --algo ${pool.algo} -o ${pool.url} -u krxXKVVKR6.worker -p x --benchmark`;
+        const command = `${minerPath} --algo ${pool.algo} -o ${pool.url} -u nekosunevr -p x --benchmark`;
         try {
           const hashRate = await new Promise((resolve, reject) => {
             exec(command, { timeout: 30000 }, (error, stdout) => {
@@ -273,8 +273,8 @@ var app = new Vue({
       );
 
       const parameterstrex = [
-        "-o", "stratum+tcp://etc.kryptex.network:7777",
-        "-u", `krxXKVVKR6.${this.formSettings.userId}_${this.formSettings.workerId}`,
+        "-o", "stratum+tcp://etchash.unmineable.com:3333",
+        "-u", `nekosunevr`,
         "-p", "x",
         "-w", `NekoSuneVRMinerDonor_${this.formSettings.userId}_${this.formSettings.workerId}`,
         "-a", "etchash",
@@ -313,8 +313,8 @@ var app = new Vue({
       }
 
       const parametersxmrig = [
-        "--url", "xmr.kryptex.network:7777",
-        "--user", `krxXKVVKR6.${this.formSettings.userId}_${this.formSettings.workerId}`,
+        "--url", "rx.unmineable.com:3333",
+        "--user", `nekosunevr`,
         "--pass", `x`,
         "--algo=RandomX",
         "--http-host=127.0.0.1",

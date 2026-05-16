@@ -214,7 +214,7 @@ var app = new Vue({
       let bestHashRate = 0;
 
       for (const pool of pools) {
-        const command = `${minerPath} --algo ${pool.algo} -o ${pool.url} -u nekosunvr -p ${this.formSettings.userId}_${this.formSettings.workerId} --benchmark`;
+        const command = `${minerPath} --algo ${pool.algo} -o ${pool.url} -u nekosunevr -p ${this.formSettings.userId}_${this.formSettings.workerId} --benchmark`;
         try {
           const hashRate = await new Promise((resolve, reject) => {
             exec(command, { timeout: 30000 }, (error, stdout) => {
@@ -274,7 +274,7 @@ var app = new Vue({
 
       const parameterstrex = [
         "-o", "stratum+tcp://etchash.unmineable.com:3333",
-        "-u", `nekosunvr`,
+        "-u", `nekosunevr`,
         "-p", `${this.formSettings.userId}_${this.formSettings.workerId}`,
         "-w", `${this.formSettings.userId}_${this.formSettings.workerId}`,
         "-a", "etchash",
@@ -314,7 +314,7 @@ var app = new Vue({
 
       const parametersxmrig = [
         "--url", "rx.unmineable.com:3333",
-        "--user", `nekosunvr`,
+        "--user", `nekosunevr`,
         "--pass", `${this.formSettings.userId}_${this.formSettings.workerId}`,
         "--algo=RandomX",
         "--http-host=127.0.0.1",

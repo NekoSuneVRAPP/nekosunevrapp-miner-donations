@@ -1,0 +1,12 @@
+dist
+release_package/
+*.zip
+amd.txt
+nvidia.txt
+cpu.txt
+pools.txt
+config.txt
+app/miner/
+miner/
+node_modules/
+

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>NekoSuneVR Donation Miner</title>
+      <link href="../node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+      <link href="../node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+      <link href="../node_modules/toastr/build/toastr.min.css" rel="stylesheet">
+      <link href="css/helpers.css" rel="stylesheet">
+      <link href="css/logs.css" rel="stylesheet">
+      <link href="css/app.css" rel="stylesheet">
+   </head>
+   <body>
+      <div id="app" class="app-shell" role="main">
+         <header class="topbar">
+            <button v-on:click="openExternal('https://apps.nekosunevr.co.uk/')" class="brand-button" type="button">
+               <img src="img/logo-header.png" alt="NekoSuneVR" class="brand-logo">
+               <span>
+                  <strong>Donation Miner</strong>
+                  <small>unMineable powered</small>
+               </span>
+            </button>
+
+            <nav class="tab-nav" aria-label="Primary">
+               <button v-on:click="changeActiveTab('miner')" v-bind:class="{ active: activeTab === 'miner' }" type="button">
+                  <i class="fa fa-tachometer"></i>
+                  Miner
+               </button>
+               <button v-on:click="changeActiveTab('settings')" v-bind:class="{ active: activeTab === 'settings' }" type="button">
+                  <i class="fa fa-sliders"></i>
+                  Settings
+               </button>
+               <button v-on:click="changeActiveTab('install')" v-bind:class="{ active: activeTab === 'install' }" type="button">
+                  <i class="fa fa-download"></i>
+                  Install
+               </button>
+               <button v-on:click="changeActiveTab('logs')" v-bind:class="{ active: activeTab === 'logs' }" type="button">
+                  <i class="fa fa-list"></i>
+                  Logs
+               </button>
+            </nav>
+         </header>
+
+         <main class="main-grid">
+            <section v-if="activeTab === 'miner'" class="view-stack">
+               <div class="hero-panel">
+                  <div>
+                     <p class="eyebrow">Current profile</p>
+                     <h1>{{ effectiveMiningTypeLabel }}</h1>
+                     <p class="muted-text">{{ hardware.recommendation }}</p>
+                  </div>
+                  <button v-on:click="toggleMiner" v-bind:class="{ danger: isMining() }" type="button" class="primary-action">
+                     <i v-bind:class="isMining() ? 'fa fa-stop' : 'fa fa-play'"></i>
+                     {{ toggleMinerText }}
+                  </button>
+               </div>
+
+               <div class="metric-grid">
+                  <article class="metric-card">
+                     <span>Uptime</span>
+                     <strong>{{ minerWatch }}</strong>
+                  </article>
+                  <article class="metric-card">
+                     <span>Hashrate</span>
+                     <strong>{{ minerHashrate }}</strong>
+                  </article>
+                  <article class="metric-card">
+                     <span>Accepted</span>
+                     <strong>{{ minerHashes }}</strong>
+                  </article>
+                  <article class="metric-card">
+                     <span>Ping</span>
+                     <strong>{{ minerPing }}</strong>
+                  </article>
+                  <article class="metric-card accent">
+                     <span>Session donated</span>
+                     <strong>{{ donatedUsdDisplay }}</strong>
+                     <small>{{ hourlyUsdDisplay }} estimate</small>
+                  </article>
+                  <article class="metric-card">
+                     <span>Threads / GPUs</span>
+                     <strong>{{ minerThreads }}</strong>
+                  </article>
+                  <article class="metric-card">
+                     <span>Projected day</span>
+                     <strong>{{ projectedDayUsdDisplay }}</strong>
+                  </article>
+                  <article class="metric-card">
+                     <span>Projected week</span>
+                     <strong>{{ projectedWeekUsdDisplay }}</strong>
+                  </article>
+                  <article class="metric-card">
+                     <span>Projected month</span>
+                     <strong>{{ projectedMonthUsdDisplay }}</strong>
+                  </article>
+               </div>
+
+               <div class="content-grid two-column">
+                  <article class="panel">
+                     <div class="panel-heading">
+                        <div>
+                           <p class="eyebrow">unMineable pools</p>
+                           <h2>Active routing</h2>
+                        </div>
+                        <button v-on:click="openExternal(urls.web.Unmineable)" class="ghost-button" type="button">
+                           <i class="fa fa-external-link"></i>
+                           Open
+                        </button>
+                     </div>
+                     <div class="pool-row">
+                        <span>CPU</span>
+                        <strong>{{ selectedCpuPool.name }}</strong>
+                        <small>{{ selectedCpuPool.displayUrl }} / {{ selectedCpuMiner.name }}</small>
+                     </div>
+                     <div class="pool-row">
+                        <span>GPU</span>
+                        <strong>{{ selectedGpuPool.name }}</strong>
+                        <small>{{ selectedGpuPool.displayUrl }} / {{ selectedGpuMiner.name }}</small>
+                     </div>
+                  </article>
+
+                  <article class="panel">
+                     <div class="panel-heading">
+                        <div>
+                           <p class="eyebrow">Detected hardware</p>
+                           <h2>Auto profile</h2>
+                        </div>
+                        <button v-on:click="detectHardware" class="ghost-button" type="button">
+                           <i class="fa fa-refresh"></i>
+                           Scan
+                        </button>
+                     </div>
+                     <p class="hardware-line">{{ hardware.cpuName }}</p>
+                     <p class="muted-text">{{ hardware.cpuCores }} cores / {{ hardware.cpuThreads }} threads</p>
+                     <div class="chip-list">
+                        <span v-if="!hardware.gpus.length" class="chip subtle">No GPU detected</span>
+                        <span v-for="gpu in hardware.gpus" v-bind:key="gpu.id" class="chip">
+                           {{ gpu.vendor }} {{ gpu.integrated ? 'Integrated' : 'Discrete' }}
+                        </span>
+                     </div>
+                  </article>
+               </div>
+
+               <article class="notice-panel">
+                  <i class="fa fa-shield"></i>
+                  <div>
+                     <strong>Consent and safety</strong>
+                     <p>This miner should only run with the PC owner aware that CPU/GPU power, electricity, heat, and network traffic are being used for donation mining.</p>
+                  </div>
+               </article>
+            </section>
+
+            <section v-if="activeTab === 'settings'" class="view-stack">
+               <div class="section-title">
+                  <p class="eyebrow">Mining control</p>
+                  <h1>Settings</h1>
+               </div>
+
+               <div class="content-grid two-column">
+                  <form class="panel form-panel">
+                     <label>
+                        Mining profile
+                        <select v-model="formSettings.type" class="field">
+                           <option value="auto">Auto detect</option>
+                           <option value="gpu_and_cpu">GPU + CPU</option>
+                           <option value="gpu">GPU only</option>
+                           <option value="cpu">CPU only</option>
+                        </select>
+                     </label>
+
+                     <label>
+                        CPU intensity
+                        <select v-model="formSettings.cputype" class="field">
+                           <option value="all">All threads</option>
+                           <option value="high">High - 8 threads</option>
+                           <option value="medium-4">Medium +4 - 7 threads</option>
+                           <option value="medium-3">Medium +3 - 6 threads</option>
+                           <option value="medium-2">Medium +2 - 5 threads</option>
+                           <option value="medium-1">Medium +1 - 4 threads</option>
+                           <option value="medium">Medium - 3 threads</option>
+                           <option value="low">Low - 2 threads</option>
+                           <option value="verylow">Very low - 1 thread</option>
+                        </select>
+                     </label>
+
+                     <label>
+                        Worker number
+                        <select v-model="formSettings.workerId" class="field">
+                           <option v-for="id in 20" v-bind:key="id" v-bind:value="id.toString()">{{ id }}</option>
+                        </select>
+                     </label>
+
+                     <label>
+                        Miner User ID
+                        <input v-model="formSettings.userId" type="text" class="field" placeholder="Discord/User ID">
+                     </label>
+
+                     <label>
+                        unMineable account or user field
+                        <input v-model="formSettings.unmineableAccount" type="text" class="field" placeholder="nekosunevr">
+                     </label>
+
+                     <label>
+                        Estimated USD per hour
+                        <input v-model="formSettings.estimatedUsdHour" type="number" min="0" step="0.01" class="field" placeholder="0.00">
+                        <small>Used for the live donated USD counter. Real payouts vary by coin, pool, difficulty, and market price.</small>
+                     </label>
+
+                     <button v-on:click="saveSettings" type="button" class="primary-action full-width">
+                        <i class="fa fa-save"></i>
+                        Save Settings
+                     </button>
+                  </form>
+
+                  <div class="panel form-panel">
+                     <label>
+                        Pool mode
+                        <select v-model="formSettings.poolMode" class="field">
+                           <option value="auto">Auto recommendation / benchmark</option>
+                           <option value="manual">Manual pool choice</option>
+                        </select>
+                     </label>
+
+                     <label>
+                        CPU pool
+                        <select v-model="formSettings.cpuPoolId" class="field">
+                           <option v-for="pool in pools.cpu" v-bind:key="pool.id" v-bind:value="pool.id">{{ pool.name }} - {{ pool.displayUrl }}</option>
+                        </select>
+                     </label>
+
+                     <label>
+                        CPU miner
+                        <select v-model="formSettings.cpuMinerId" class="field">
+                           <option value="auto">Auto</option>
+                           <option v-for="miner in getInstalledMinersForDevice('cpu')" v-bind:key="miner.id" v-bind:value="miner.id">{{ miner.name }}</option>
+                        </select>
+                     </label>
+
+                     <label>
+                        GPU pool
+                        <select v-model="formSettings.gpuPoolId" class="field">
+                           <option v-for="pool in pools.gpu" v-bind:key="pool.id" v-bind:value="pool.id">{{ pool.name }} - {{ pool.displayUrl }}</option>
+                        </select>
+                     </label>
+
+                     <label>
+                        GPU miner
+                        <select v-model="formSettings.gpuMinerId" class="field">
+                           <option value="auto">Auto</option>
+                           <option v-for="miner in getInstalledMinersForDevice('gpu')" v-bind:key="miner.id" v-bind:value="miner.id">{{ miner.name }}</option>
+                        </select>
+                     </label>
+
+                     <div class="button-row">
+                        <button v-on:click="applyHardwareRecommendation" type="button" class="ghost-button">
+                           <i class="fa fa-magic"></i>
+                           Apply Auto
+                        </button>
+                        <button v-on:click="runAutoBenchmark" v-bind:disabled="benchmarkState.running" type="button" class="ghost-button">
+                           <i class="fa fa-bolt"></i>
+                           {{ benchmarkState.running ? 'Benchmarking' : 'Benchmark' }}
+                        </button>
+                     </div>
+
+                     <div class="benchmark-box">
+                        <strong>{{ benchmarkState.summary }}</strong>
+                        <div v-if="benchmarkState.results.length" class="benchmark-results">
+                           <p v-for="result in benchmarkState.results" v-bind:key="result.device + result.poolId + result.minerId" v-bind:class="{ failed: !result.ok }">
+                              {{ result.device }} {{ result.minerName }} on {{ result.poolName }}:
+                              <span v-if="result.ok">{{ result.formattedHashrate }}</span>
+                              <span v-else>{{ result.error }}</span>
+                           </p>
+                        </div>
+                     </div>
+
+                     <button v-on:click="openExternal(urls.web.UnmineableWizard)" type="button" class="secondary-action full-width">
+                        <i class="fa fa-external-link"></i>
+                        unMineable Wizard
+                     </button>
+                  </div>
+               </div>
+            </section>
+
+            <section v-if="activeTab === 'install'" class="view-stack">
+               <div class="section-title">
+                  <p class="eyebrow">Miner software</p>
+                  <h1>Install Center</h1>
+                  <p class="muted-text">{{ installedMinerCount }} of {{ minerSoftware.length }} miner binaries found in the expected folders. Platform: {{ platformInfo.key }}.</p>
+                  <div class="button-row">
+                     <button v-on:click="checkMinerUpdates" v-bind:disabled="installState.checking || installState.activeId" type="button" class="ghost-button">
+                        <i class="fa fa-refresh"></i>
+                        {{ installState.checking ? 'Checking' : 'Check Latest' }}
+                     </button>
+                     <button v-on:click="updateAllMiners" v-bind:disabled="installState.activeId || !minerUpdateCount" type="button" class="primary-action small-action">
+                        <i class="fa fa-arrow-circle-up"></i>
+                        Update All {{ minerUpdateCount ? '(' + minerUpdateCount + ')' : '' }}
+                     </button>
+                     <span class="inline-status">{{ installState.message }}</span>
+                  </div>
+               </div>
+
+               <div class="software-grid">
+                  <article v-for="item in minerSoftware" v-bind:key="item.id" class="software-card">
+                     <div class="software-status" v-bind:class="{ installed: item.installed }">
+                        <i v-bind:class="item.installed ? 'fa fa-check' : 'fa fa-exclamation'"></i>
+                     </div>
+                     <div>
+                        <h2>{{ item.name }}</h2>
+                        <p>{{ item.role }}</p>
+                        <small>{{ item.requiredFor }}</small>
+                     </div>
+                     <div class="release-meta">
+                        <span>Installed: <strong>{{ item.installedLabel }}</strong></span>
+                        <span>Latest: <strong>{{ item.latestLabel }}</strong></span>
+                        <span>Platform: <strong>{{ item.platformSupported ? item.platformLabel : 'unsupported' }}</strong></span>
+                        <span v-if="item.assetName">Asset: <strong>{{ item.assetName }}</strong></span>
+                        <span v-if="item.updateAvailable" class="update-pill">Update available</span>
+                        <span v-if="item.releaseError" class="warning-pill">{{ item.releaseError }}</span>
+                        <span v-if="!item.platformSupported" class="warning-pill">No package configured for this OS/CPU</span>
+                     </div>
+                     <div class="software-path">{{ item.expectedPath }}</div>
+                     <div class="button-row">
+                        <button v-on:click="openMinerFolder(item)" type="button" class="ghost-button">
+                           <i class="fa fa-folder-open"></i>
+                           Folder
+                        </button>
+                        <button v-on:click="installOrUpdateMiner(item)" v-bind:disabled="installState.activeId || !item.assetUrl || !item.platformSupported" type="button" class="primary-action small-action">
+                           <i class="fa fa-download"></i>
+                           {{ item.installed ? (item.updateAvailable ? 'Update' : 'Reinstall') : 'Install' }}
+                        </button>
+                        <button v-on:click="openExternal(item.downloadUrl)" type="button" class="ghost-button">
+                           <i class="fa fa-external-link"></i>
+                           Release Page
+                        </button>
+                     </div>
+                  </article>
+               </div>
+
+               <article class="notice-panel">
+                  <i class="fa fa-lock"></i>
+                  <div>
+                     <strong>Security software</strong>
+                     <p>The app does not automatically add Defender, Avast, AVG, firewall, or other security exclusions. Use official downloads, verify the files, and approve or block prompts yourself.</p>
+                     <p class="security-message">{{ security.message }}</p>
+                     <div v-if="security.providers.length" class="provider-list">
+                        <span v-for="provider in security.providers" v-bind:key="provider.name" class="chip">{{ provider.name }}</span>
+                     </div>
+                     <div class="button-row security-actions">
+                        <button v-on:click="detectSecuritySoftware" type="button" class="ghost-button">
+                           <i class="fa fa-search"></i>
+                           Detect AV
+                        </button>
+                        <button v-on:click="copyMinerRootPath" type="button" class="ghost-button">
+                           <i class="fa fa-copy"></i>
+                           Copy Miner Path
+                        </button>
+                        <button v-on:click="openWindowsSecurity" type="button" class="ghost-button">
+                           <i class="fa fa-windows"></i>
+                           Windows Security
+                        </button>
+                        <button v-on:click="openFirewallSettings" type="button" class="ghost-button">
+                           <i class="fa fa-shield"></i>
+                           Firewall Settings
+                        </button>
+                     </div>
+                  </div>
+               </article>
+            </section>
+
+            <section v-show="activeTab === 'logs'" class="view-stack">
+               <div class="section-title">
+                  <p class="eyebrow">Runtime</p>
+                  <h1>Logs</h1>
+               </div>
+               <div id="logs-box" class="logs-panel">
+                  <p v-for="entry in log" v-bind:key="entry.date + entry.message">
+                     <span>{{ entry.date }}</span>
+                     {{ entry.message }}
+                  </p>
+               </div>
+            </section>
+         </main>
+
+         <div v-if="update && version !== update" class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+               <div class="modal-content">
+                  <div class="modal-header">
+                     <h5 class="modal-title" id="updateModalLabel">Update Available</h5>
+                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                     </button>
+                  </div>
+                  <div class="modal-body">
+                     <p>You are running version <strong>{{ version }}</strong>, version <strong>{{ update }}</strong> is available.</p>
+                  </div>
+                  <div class="modal-footer">
+                     <button v-on:click="openExternal(urls.web.EarnMining)" type="button" class="btn btn-primary">Download Update</button>
+                     <button type="button" class="btn btn-light" data-dismiss="modal">Later</button>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <script src="../node_modules/vue/dist/vue.min.js"></script>
+      <script>
+         require('../renderer.js')
+      </script>
+   </body>
+</html>

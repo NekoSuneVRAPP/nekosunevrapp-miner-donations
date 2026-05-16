@@ -1,0 +1,120 @@
+name: Build Electron App
+
+on:
+  push:
+    branches:
+      - windows
+      - main
+    tags:
+      - "v*"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            runner: windows-latest
+            script: packager:win:x64
+            dist_dir: nekosunevrapp-miner-donations-win32-x64
+            artifact: nekosunevrapp-miner-donations-win32-x64
+            archive: nekosunevrapp-miner-donations-win32-x64.zip
+          - name: Linux x64
+            runner: ubuntu-latest
+            script: packager:linux:x64
+            dist_dir: nekosunevrapp-miner-donations-linux-x64
+            artifact: nekosunevrapp-miner-donations-linux-x64
+            archive: nekosunevrapp-miner-donations-linux-x64.zip
+          - name: Linux ARM64
+            runner: ubuntu-latest
+            script: packager:linux:arm64
+            dist_dir: nekosunevrapp-miner-donations-linux-arm64
+            artifact: nekosunevrapp-miner-donations-linux-arm64
+            archive: nekosunevrapp-miner-donations-linux-arm64.zip
+          - name: Linux ARMv7
+            runner: ubuntu-latest
+            script: packager:linux:armv7l
+            dist_dir: nekosunevrapp-miner-donations-linux-armv7l
+            artifact: nekosunevrapp-miner-donations-linux-armv7l
+            archive: nekosunevrapp-miner-donations-linux-armv7l.zip
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build app package
+        run: npm run ${{ matrix.script }}
+
+      - name: Assert miners are not bundled
+        shell: bash
+        run: |
+          if [ -d "dist/${{ matrix.dist_dir }}/resources/app/miner" ]; then
+            echo "Packaged app contains root miner folder; miner binaries must be downloaded at runtime."
+            find "dist/${{ matrix.dist_dir }}/resources/app/miner" -maxdepth 3 -type f || true
+            exit 1
+          fi
+          if [ -d "dist/${{ matrix.dist_dir }}/resources/app/app/miner" ]; then
+            echo "Packaged app contains app/miner folder; miner binaries must be downloaded at runtime."
+            find "dist/${{ matrix.dist_dir }}/resources/app/app/miner" -maxdepth 3 -type f || true
+            exit 1
+          fi
+
+      - name: Create archive on Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Compress-Archive -Path "dist/${{ matrix.dist_dir }}/*" -DestinationPath "${{ matrix.archive }}" -Force
+
+      - name: Create archive on Linux
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          cd dist
+          zip -r "../${{ matrix.archive }}" "${{ matrix.dist_dir }}"
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.archive }}
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+          merge-multiple: true
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-artifacts/*.zip
+          draft: false
+          prerelease: true
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

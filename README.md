@@ -22,7 +22,7 @@ This miner primarily supports Monero (XMR) and other privacy-focused cryptocurre
 ---
 
 ## **Antivirus Detection & Security Notice**
-Many antivirus programs may detect `XMRIG.EXE` and other mining software as a virus or malware. This is a **false positive**. The reason for this detection is that some malicious actors secretly install miners on victims' computers to mine cryptocurrency without their consent (a practice known as "cryptojacking"). As a result, antivirus companies often flag **all** mining software as a potential threat, even when it's being used legitimately.
+Many antivirus programs may detect `XMRIG.EXE` and other mining software as potentially unwanted software. This happens because miners are often abused for hidden mining without consent. Only run this app on computers where the owner understands that CPU/GPU power, electricity, heat, and network traffic will be used for donation mining.
 
 ### **Why Do Miners Get Flagged as Viruses?**
 1. **Windows Defender and Antivirus Programs Protect Users from Unauthorized Mining**
@@ -38,18 +38,41 @@ Many antivirus programs may detect `XMRIG.EXE` and other mining software as a vi
    - Mining software is often included in malware blacklists, even when downloaded from official sources.
 
 ### **How to Safely Use This Miner**
-To install and run the miner without interference from your antivirus:
-1. **Temporarily disable your antivirus or Windows Defender.**
-2. **Download and extract the miner files.**
-3. **Run the miner and allow the required files if prompted.**
-4. **If necessary, add an exception for `XMRIG.EXE` to prevent future detections.**
+1. Download miner binaries only from official release pages.
+2. Verify the files before use.
+3. Review antivirus prompts yourself and approve only files you trust.
+4. Do not run the miner silently or without the PC owner's consent.
 
-If the file is deleted or blocked, the miner will not work properly.
+This app does not automatically add Windows Defender, Avast, AVG, firewall, or other security exclusions. The Install Center can open Windows security/firewall settings and copy the miner folder path so the user can review changes manually.
 
 ---
 
 ## **Keeping Your Miner Up to Date**
-Make sure to keep your miner updated when new versions are released. All necessary files are included in the package, and updates will be provided in our community.
+The Install Center can check the latest official GitHub release for supported miners and install a compatible Windows or Linux package into `miner/multi/<miner>`.
+
+Supported release checks:
+- XMRig
+- T-Rex Miner
+- lolMiner
+- NBMiner
+- GMiner
+- SRBMiner-Multi
+- BzMiner
+- Rigel
+
+Build targets:
+- `npm run packager:win:x64`
+- `npm run packager:linux:x64`
+- `npm run packager:linux:arm64`
+- `npm run packager:linux:armv7l`
+
+GitHub Actions builds these same targets on Windows and Linux runners. Branch and pull-request builds upload ZIP artifacts to the workflow run. Version tags matching `v*` publish a prerelease with all ZIPs attached.
+
+Miner binaries are not bundled in release builds. The package scripts ignore `miner/` and `app/miner/`, and the workflow fails if a packaged app contains either folder. Users install or update miners from the in-app Install Center.
+
+Linux ARM/Raspberry Pi builds are CPU-focused. XMRig is the practical miner path there; GPU miners usually do not provide Raspberry Pi-compatible packages.
+
+The app stores the installed release tag when it installs a miner. Manually copied miner binaries may show as `Manual install` because the app cannot reliably prove their original release version.
 
 ### **Support & Updates**
 Join our Discord server for the latest news and support: [https://discord.gg/RYscPHc](https://discord.gg/RYscPHc)  
@@ -77,4 +100,4 @@ All contributions go toward improving stream quality, getting new games, and enh
 ---
 
 ## **Final Notes**
-Thank you for supporting the project! Your contributions and participation help keep this miner and the community running. Happy mining! ðŸš€
+Thank you for supporting the project! Your contributions and participation help keep this miner and the community running. Happy mining!
